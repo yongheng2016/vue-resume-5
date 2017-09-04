@@ -104,11 +104,16 @@ var app = new _vue2.default({
 
     window.onbeforeload = function () {
       var dataString = JSON.stringify(_this.todoList);
-      window.localStorage.setItem('myTodos', dataString);
+      var Todo = _leancloudStorage2.default.Object.extend('Todo');
+      var todo = new Todo();
+      todo.set('content', dataString);
+      todo.save().then(function (todo) {
+        console.log('New object created with objectId: ' + todo.id);
+      }, function (error) {
+        console.error('Failed to create new object, with error message: ' + error.message);
+      });
+      _this.currentUser = _this.getCurrentUser();
     };
-    var oldDataString = window.localStorage.getItem('myTodos');
-    var oldData = JSON.parse(oldDataString);
-    this.todoList = oldData || [];
   },
   methods: {
     addTodo: function addTodo() {

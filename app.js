@@ -24,11 +24,16 @@ var app = new Vue({
   created: function (){
     window.onbeforeload=()=>{
       let dataString = JSON.stringify(this.todoList)
-      window.localStorage.setItem('myTodos', dataString)
+      var Todo = AV.Object.extend('Todo');
+      var todo = new Todo();
+      todo.set('content', dataString);
+      todo.save().then(function (todo) {
+        console.log('New object created with objectId: ' + todo.id);
+      }, function (error) {
+        console.error('Failed to create new object, with error message: ' + error.message);
+      });
+      this.currentUser = this.getCurrentUser()
     }
-    let oldDataString = window.localStorage.getItem('myTodos')
-    let oldData = JSON.parse(oldDataString)
-    this.todoList = oldData || []
   },
   methods: {
     addTodo: function (){
