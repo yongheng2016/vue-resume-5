@@ -22,20 +22,25 @@ var app = new Vue({
     }
   },
   created: function (){
-    window.onbeforeload=()=>{
-      let dataString = JSON.stringify(this.todoList)
-      var Todo = AV.Object.extend('Todo');
-      var todo = new Todo();
-      todo.set('content', dataString);
-      todo.save().then(function (todo) {
-        console.log('New object created with objectId: ' + todo.id);
-      }, function (error) {
-        console.error('Failed to create new object, with error message: ' + error.message);
-      });
       this.currentUser = this.getCurrentUser()
-    }
   },
   methods: {
+    saveTodos: function(){
+      let dataString = JSON.stringify(this.todoList)
+      var AVTodos = AV.Object.extend('AllTodos');
+      var avTodos = new AVTodos();
+      var acl = new AV.ACL()
+      acl.setReadAccess(AV.User.current(),true) // 只有这个 user 能读
+      acl.setWriteAccess(AV.User.current(),true) // 只有这个 user 能写
+
+      avTodos.set('content', dataString);
+      avTodos.setACL(acl) // 设置访问控制
+      avTodos.save().then(function (todo) {
+        alert('保存成功');
+      }, function (error) {
+        alert('保存失败');
+      });
+    },
     addTodo: function (){
       this.todoList.push({
         title: this.newTodo,

@@ -100,22 +100,25 @@ var app = new _vue2.default({
     }
   },
   created: function created() {
-    var _this = this;
-
-    window.onbeforeload = function () {
-      var dataString = JSON.stringify(_this.todoList);
-      var Todo = _leancloudStorage2.default.Object.extend('Todo');
-      var todo = new Todo();
-      todo.set('content', dataString);
-      todo.save().then(function (todo) {
-        console.log('New object created with objectId: ' + todo.id);
-      }, function (error) {
-        console.error('Failed to create new object, with error message: ' + error.message);
-      });
-      _this.currentUser = _this.getCurrentUser();
-    };
+    this.currentUser = this.getCurrentUser();
   },
   methods: {
+    saveTodos: function saveTodos() {
+      var dataString = JSON.stringify(this.todoList);
+      var AVTodos = _leancloudStorage2.default.Object.extend('AllTodos');
+      var avTodos = new AVTodos();
+      var acl = new _leancloudStorage2.default.ACL();
+      acl.setReadAccess(_leancloudStorage2.default.User.current(), true); // 只有这个 user 能读
+      acl.setWriteAccess(_leancloudStorage2.default.User.current(), true); // 只有这个 user 能写
+
+      avTodos.set('content', dataString);
+      avTodos.setACL(acl); // 设置访问控制
+      avTodos.save().then(function (todo) {
+        alert('保存成功');
+      }, function (error) {
+        alert('保存失败');
+      });
+    },
     addTodo: function addTodo() {
       this.todoList.push({
         title: this.newTodo,
@@ -129,23 +132,23 @@ var app = new _vue2.default({
       this.todoList.splice(index, 1);
     },
     signUp: function signUp() {
-      var _this2 = this;
+      var _this = this;
 
       var user = new _leancloudStorage2.default.User();
       user.setUsername(this.formData.username);
       user.setPassword(this.formData.password);
       user.signUp().then(function (loginedUser) {
-        _this2.currentUser = _this2.getCurrentUser();
+        _this.currentUser = _this.getCurrentUser();
       }, function (error) {
         alert(error);
       });
     },
     login: function login() {
-      var _this3 = this;
+      var _this2 = this;
 
       _leancloudStorage2.default.User.logIn(this.formData.username, this.formData.password).then(function (loginedUser) {
         // 👈
-        _this3.currentUser = _this3.getCurrentUser();
+        _this2.currentUser = _this2.getCurrentUser();
       }, function (error) {
         alert(error);
       });
